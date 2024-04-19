@@ -4,6 +4,11 @@
 
 ## Mock 데이터로 작업 가이드
 
+### Firebase 설정
+```shell
+flutterfire configure
+```
+
 ### Firebase 에뮬레이터 시동
 ```shell
 # 데이터 복원 & 백업
