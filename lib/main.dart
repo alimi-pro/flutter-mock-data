@@ -1,3 +1,6 @@
+import 'package:alimipro_mock_data/data/repository/firebase_academy_repository_impl.dart';
+import 'package:alimipro_mock_data/domain/model/academy.dart';
+import 'package:alimipro_mock_data/domain/repository/academy_repository.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -10,8 +13,7 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  final db = FirebaseFirestore.instance
-    ..useFirestoreEmulator('10.0.2.2', 8080);
+  final db = FirebaseFirestore.instance..useFirestoreEmulator('10.0.2.2', 8080);
 
   runApp(MyApp(db: db));
 }
@@ -33,17 +35,22 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: AlimiproSample(db: db),
+      home: AlimiproSample(
+        academyRepository: FirebaseAcademyRepositoryImpl(
+          uid: 'KSm9vmT57KNDRb0QFWlZ0W416qs1',
+          firebaseFirestore: db,
+        ),
+      ),
     );
   }
 }
 
 class AlimiproSample extends StatelessWidget {
-  final FirebaseFirestore db;
+  final AcademyRepository academyRepository;
 
   const AlimiproSample({
     super.key,
-    required this.db,
+    required this.academyRepository,
   });
 
   @override
@@ -52,15 +59,19 @@ class AlimiproSample extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Alimipro 샘플'),
       ),
-      body: FutureBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-          future: db.collection('Academies').doc('KSm9vmT57KNDRb0QFWlZ0W416qs1').get(),
+      body: FutureBuilder<Academy>(
+          future: academyRepository.getAcademy(),
           builder: (context, snapshot) {
+            if (snapshot.hasError) {
+              return Center(child: Text(snapshot.error.toString()));
+            }
+
             if (!snapshot.hasData) {
               return const Center(child: Text('값 없음'));
             }
 
             return Center(
-              child: Text(snapshot.data!.data().toString()),
+              child: Text(snapshot.data.toString()),
             );
           }),
     );
